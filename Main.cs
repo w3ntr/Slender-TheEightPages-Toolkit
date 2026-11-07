@@ -2,7 +2,7 @@
 using MelonLoader;
 using System.Reflection;
 
-[assembly: MelonInfo(typeof(SlenderToolkit.Main), "Slender Toolkit", "1.0.0", "w3ntr")]
+[assembly: MelonInfo(typeof(SlenderToolkit.Main), "Slender Toolkit", "1.1.0", "w3ntr")]
 [assembly: MelonGame("Parsec Productions", "Slender")]
 
 namespace SlenderToolkit
@@ -11,7 +11,7 @@ namespace SlenderToolkit
     {
         public override void OnApplicationStart()
         {
-            MelonLogger.Msg("=== Slender Toolkit v1.0.0 Loaded ===");
+            MelonLogger.Msg("=== Slender Toolkit v1.1.0 Loaded ===");
 
             CursorPatch.Initialize();
             SpeedHackPatch.Initialize();
@@ -23,9 +23,8 @@ namespace SlenderToolkit
             GraphicsModule.Initialize();
             PageESPModule.Initialize();
             PlayerModule.Initialize();
-            SpeedDiagnostics.Initialize();
             StaminaUIModule.Initialize();
-            SceneDiagnostics.Initialize();
+            SeedManager.Initialize();
 
             MelonLogger.Msg("All modules initialized successfully!");
         }
@@ -45,8 +44,8 @@ namespace SlenderToolkit
             GraphicsModule.Update();
             PageESPModule.Update();
             PlayerModule.Update();
-            SpeedDiagnostics.Update();
             StaminaUIModule.Update();
+            SeedManager.Update();
         }
 
         public override void OnLateUpdate()
@@ -61,6 +60,7 @@ namespace SlenderToolkit
             PageESPModule.OnGUI();
             PlayerModule.OnGUI();
             StaminaUIModule.OnGUI();
+            SeedManager.OnGUI();
         }
     }
 }

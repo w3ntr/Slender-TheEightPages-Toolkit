@@ -10,26 +10,24 @@ namespace SlenderToolkit
         private static HarmonyLib.Harmony harmony;
         private static bool isPatched = false;
         private static bool isInsidePatch = false;
-        private static int blockCount = 0; // Для ограничения спама в логах
+        private static int blockCount = 0;
 
         public static void Initialize()
         {
             if (isPatched) return;
 
             harmony = new HarmonyLib.Harmony("com.w3ntr.slendertoolkit.cursorpatch");
-
-            // Используем AccessTools.Method - это самый надёжный способ найти setter в Harmony
             MethodInfo targetMethod = AccessTools.Method(typeof(Screen), "set_lockCursor");
 
             if (targetMethod != null)
             {
                 MethodInfo prefixMethod = typeof(CursorPatch).GetMethod(nameof(LockCursorPrefix), BindingFlags.Static | BindingFlags.NonPublic);
                 harmony.Patch(targetMethod, prefix: new HarmonyMethod(prefixMethod));
-                MelonLogger.Msg("CursorPatch: Successfully patched Screen.set_lockCursor via AccessTools!");
+                MelonLogger.Msg("CursorPatch: Successfully patched Screen.set_lockCursor!");
             }
             else
             {
-                MelonLogger.Msg("CursorPatch: ERROR - Could not find Screen.set_lockCursor method!");
+                MelonLogger.Msg("CursorPatch: ERROR - Could not find Screen.set_lockCursor!");
             }
 
             isPatched = true;
@@ -39,14 +37,16 @@ namespace SlenderToolkit
         {
             if (isInsidePatch) return true;
 
-            // Если меню открыто и игра пытается заблокировать курсор
-            if (WindowModule.IsMenuOpen && value == true)
+            // Проверяем ОБА флага: WindowModule И SeedManager
+            bool anyMenuOpen = WindowModule.IsMenuOpen || SeedManager.IsMenuOpen;
+
+            // Если ЛЮБОЕ меню открыто и игра пытается заблокировать курсор
+            if (anyMenuOpen && value == true)
             {
                 isInsidePatch = true;
                 value = false; // Принудительно меняем значение на false
                 isInsidePatch = false;
 
-                // Логируем только первые 5 блокировок, чтобы не спамить
                 if (blockCount < 5)
                 {
                     MelonLogger.Msg($"CursorPatch: BLOCKED lockCursor=true (attempt #{blockCount + 1})");
@@ -56,8 +56,8 @@ namespace SlenderToolkit
                 return false; // Отменяем оригинальный вызов
             }
 
-            // Сбрасываем счётчик, когда меню закрыто
-            if (!WindowModule.IsMenuOpen)
+            // Сбрасываем счётчик, когда ВСЕ меню закрыты
+            if (!anyMenuOpen)
             {
                 blockCount = 0;
             }
